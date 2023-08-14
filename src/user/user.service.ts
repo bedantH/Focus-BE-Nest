@@ -34,10 +34,12 @@ export class UserService {
   }
 
   async addSessionToUser(id: string, session: Session): Promise<UserDocument> {
-    Logger.log(session);
-
     return this.userModel.findByIdAndUpdate(id, {
-      $push: { sessions: session },
+      $push: {
+        sessions: {
+          $each: [session],
+        },
+      },
     });
   }
 

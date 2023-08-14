@@ -14,7 +14,7 @@ export class TasksController {
   @Get('all')
   async findAll(): Promise<IResponse> {
     try {
-      const tasks = this.tasksService.findAll();
+      const tasks = await this.tasksService.findAll();
 
       return {
         status: 200,

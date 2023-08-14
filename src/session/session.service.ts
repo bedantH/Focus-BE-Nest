@@ -54,8 +54,9 @@ export class SessionService {
     sessionId: string,
     note: mongoose.Types.ObjectId,
   ): Promise<SessionDocument> {
-    const session = await this.sessionModel.findById(sessionId);
-    session.notes.push(note as unknown as string);
+    const session = await this.sessionModel.findByIdAndUpdate(sessionId, {
+      $push: { notes: note as unknown as string },
+    });
 
     return session.save();
   }
@@ -74,8 +75,9 @@ export class SessionService {
     sessionId: string,
     restriction: mongoose.Types.ObjectId,
   ): Promise<SessionDocument> {
-    const session = await this.sessionModel.findById(sessionId);
-    session.restrictions.push(restriction as unknown as string);
+    const session = await this.sessionModel.findByIdAndUpdate(sessionId, {
+      $push: { restrictions: restriction as unknown as string },
+    });
 
     return session.save();
   }
@@ -96,8 +98,9 @@ export class SessionService {
     sessionId: string,
     task: mongoose.Types.ObjectId,
   ): Promise<SessionDocument> {
-    const session = await this.sessionModel.findById(sessionId);
-    session.tasks.push(task as unknown as string);
+    const session = await this.sessionModel.findByIdAndUpdate(sessionId, {
+      $push: { tasks: task as unknown as string },
+    });
 
     return session.save();
   }

@@ -138,8 +138,6 @@ export class NotesController {
     try {
       const deletedNote = await this.noteService.delete(id);
 
-      await this.sessionService.removeNoteFromSession(deletedNote.session, id);
-
       if (!deletedNote) {
         return {
           status: 404,
@@ -147,6 +145,8 @@ export class NotesController {
           data: null,
         };
       }
+
+      await this.sessionService.removeNoteFromSession(deletedNote.session, id);
 
       return {
         status: 200,

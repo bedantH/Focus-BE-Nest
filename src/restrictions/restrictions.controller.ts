@@ -32,7 +32,7 @@ export class RestrictionsController {
   @Get(':id')
   async getOneRestrictionById(@Param('id') id: string): Promise<IResponse> {
     try {
-      const restriction = this.restrictionServive.findById(id);
+      const restriction = await this.restrictionServive.findById(id);
 
       return {
         status: 200,
