@@ -10,10 +10,15 @@ import {
   Put,
   Delete,
 } from '@nestjs/common/decorators';
+import { NoteDto } from './dto/note.dto';
+import { SessionService } from 'src/session/session.service';
 
 @Controller('notes')
 export class NotesController {
-  constructor(private noteService: NotesService) {}
+  constructor(
+    private noteService: NotesService,
+    private sessionService: SessionService,
+  ) {}
 
   @HttpCode(200)
   @Get('all')
@@ -60,9 +65,11 @@ export class NotesController {
 
   @HttpCode(200)
   @Post('create')
-  async createNewNote(@Body() data: Note): Promise<IResponse> {
+  async createNewNote(@Body() data: NoteDto): Promise<IResponse> {
     try {
       const newNote = await this.noteService.create(data);
+
+      this.sessionService.addNoteToSession(data.session, newNote);
 
       return {
         status: 200,

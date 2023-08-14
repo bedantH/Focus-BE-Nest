@@ -28,7 +28,9 @@ export class Task {
   @Prop()
   description: string;
 
-  @Prop()
+  @Prop({
+    type: mongoose.Schema.Types.Date,
+  })
   due_date: Date;
 
   @Prop()

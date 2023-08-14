@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Session } from './session.schema';
@@ -14,11 +14,21 @@ export class SessionService {
   ) {}
 
   async findAll(): Promise<Session[]> {
-    return this.sessionModel.find().exec();
+    // populate notes, restrictions, tasks
+    const sessions = this.sessionModel
+      .find()
+      .populate('tasks')
+      .populate('notes')
+      .populate('restrictions')
+      .exec();
+
+    return sessions;
   }
 
-  async findById(id: string): Promise<Session> {
-    return this.sessionModel.findById(id);
+  async findOne(id: string): Promise<Session> {
+    const session = this.sessionModel.findById(id).exec();
+
+    return session;
   }
 
   async create(data: Session): Promise<Session> {

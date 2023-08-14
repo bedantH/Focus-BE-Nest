@@ -1,7 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Session } from 'src/session/session.schema';
+import * as bcrypt from 'bcrypt';
 
+const SALT_WORK_FACTOR = 10;
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({
@@ -11,7 +13,7 @@ export class User {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true, validate: /\S+@\S+\.\S+/, index: true })
   email: string;
 
   @Prop({ required: true })
@@ -19,14 +21,30 @@ export class User {
 
   @Prop([
     {
-      type: mongoose.Schema.Types.ObjectId,
+      type: [mongoose.Schema.Types.ObjectId],
       ref: 'Session',
     },
   ])
   sessions: Session[];
 
-  @Prop()
+  @Prop({
+    default: false,
+  })
   isInternal: boolean;
+  comparePassword?: (candidatePassword: string) => Promise<boolean>;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
+  this.password = await bcrypt.hash(this.password, SALT_WORK_FACTOR);
+});
+
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// eslint-disable-next-line prettier/prettier
+export { UserSchema };

@@ -1,14 +1,18 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { SessionService } from './session.service';
 import { Get, Post, Put, Delete, HttpCode, Param, Body } from '@nestjs/common';
 import { Session } from './session.schema';
 import { Note } from 'src/notes/note.schema';
 import { Task } from 'src/tasks/tasks.schema';
 import { Restriction } from 'src/restrictions/restriction.schema';
+import { UserService } from 'src/user/user.service';
 
 @Controller('session')
 export class SessionController {
-  constructor(private sessionService: SessionService) {}
+  constructor(
+    private sessionService: SessionService,
+    private userService: UserService,
+  ) {}
 
   @HttpCode(200)
   @Get('all')
@@ -35,7 +39,7 @@ export class SessionController {
   @Get(':id')
   async getSessionById(@Param('id') id: string): Promise<IResponse> {
     try {
-      const session = this.sessionService.findById(id);
+      const session = this.sessionService.findOne(id);
 
       return {
         status: 200,
@@ -57,6 +61,8 @@ export class SessionController {
   async createSession(@Body() data: Session): Promise<IResponse> {
     try {
       const session = await this.sessionService.create(data);
+
+      this.userService.addSessionToUser(data.created_by, session);
 
       return {
         status: 200,

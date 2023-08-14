@@ -13,10 +13,12 @@ export class Session {
   @Prop({ required: true })
   title: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: mongoose.Schema.Types.Date })
   start_time: Date;
 
-  @Prop()
+  @Prop({
+    type: mongoose.Schema.Types.Date,
+  })
   end_time: Date;
 
   @Prop()
@@ -54,6 +56,13 @@ export class Session {
     },
   ])
   restrictions: Restriction[];
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  })
+  created_by: string;
 }
 
 export const SessionSchema = SchemaFactory.createForClass(Session);
