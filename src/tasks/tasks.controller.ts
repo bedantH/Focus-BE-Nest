@@ -2,10 +2,14 @@ import { Controller } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Get, Post, Put, Delete, HttpCode, Param, Body } from '@nestjs/common';
 import { Task } from './tasks.schema';
+import { SessionService } from 'src/session/session.service';
 
 @Controller('task')
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private sessionService: SessionService,
+  ) {}
 
   @Get('all')
   async findAll(): Promise<IResponse> {
@@ -30,7 +34,15 @@ export class TasksController {
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<IResponse> {
     try {
-      const task = this.tasksService.findById(id);
+      const task = await this.tasksService.findById(id);
+
+      if (!task) {
+        return {
+          status: 404,
+          message: 'Task not found',
+          data: null,
+        };
+      }
 
       return {
         status: 200,
@@ -51,6 +63,8 @@ export class TasksController {
   async create(@Body() data: Task): Promise<IResponse> {
     try {
       const task = await this.tasksService.create(data);
+
+      this.sessionService.addTaskToSession(data.session, task._id);
 
       return {
         status: 200,
@@ -75,6 +89,14 @@ export class TasksController {
     try {
       const task = await this.tasksService.update(id, data);
 
+      if (!task) {
+        return {
+          status: 404,
+          message: 'Task not found',
+          data: null,
+        };
+      }
+
       return {
         status: 200,
         message: 'Task updated successfully',
@@ -94,6 +116,14 @@ export class TasksController {
   async delete(@Param('id') id: string): Promise<IResponse> {
     try {
       const task = await this.tasksService.delete(id);
+
+      if (!task) {
+        return {
+          status: 404,
+          message: 'Task not found',
+          data: null,
+        };
+      }
 
       return {
         status: 200,

@@ -1,8 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Date, HydratedDocument } from 'mongoose';
-import { Note } from 'src/notes/note.schema';
-import { Restriction } from 'src/restrictions/restriction.schema';
-import { Task } from 'src/tasks/tasks.schema';
 
 export type SessionDocument = HydratedDocument<Session>;
 
@@ -39,7 +36,7 @@ export class Session {
       ref: 'Note',
     },
   ])
-  notes: Note[];
+  notes: string[];
 
   @Prop([
     {
@@ -47,7 +44,7 @@ export class Session {
       ref: 'Task',
     },
   ])
-  tasks: Task[];
+  tasks: string[];
 
   @Prop([
     {
@@ -55,7 +52,7 @@ export class Session {
       ref: 'Restriction',
     },
   ])
-  restrictions: Restriction[];
+  restrictions: string[];
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

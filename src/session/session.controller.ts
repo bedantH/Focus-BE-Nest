@@ -6,6 +6,7 @@ import { Note } from 'src/notes/note.schema';
 import { Task } from 'src/tasks/tasks.schema';
 import { Restriction } from 'src/restrictions/restriction.schema';
 import { UserService } from 'src/user/user.service';
+import mongoose, { ObjectId } from 'mongoose';
 
 @Controller('session')
 export class SessionController {
@@ -39,7 +40,15 @@ export class SessionController {
   @Get(':id')
   async getSessionById(@Param('id') id: string): Promise<IResponse> {
     try {
-      const session = this.sessionService.findOne(id);
+      const session = await this.sessionService.findOne(id);
+
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
 
       return {
         status: 200,
@@ -88,6 +97,14 @@ export class SessionController {
     try {
       const session = await this.sessionService.update(id, data);
 
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
+
       return {
         status: 200,
         message: 'Session updated successfully',
@@ -108,6 +125,14 @@ export class SessionController {
   async deleteSession(@Param('id') id: string): Promise<IResponse> {
     try {
       const session = await this.sessionService.delete(id);
+
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
 
       return {
         status: 200,
@@ -194,10 +219,21 @@ export class SessionController {
   @Post('session/:id/add/note')
   async addNoteToSession(
     @Param('id') id: string,
-    @Body() data: { note: Note },
+    @Body() note_id: string,
   ): Promise<IResponse> {
     try {
-      const session = await this.sessionService.addNoteToSession(id, data.note);
+      const session = await this.sessionService.addNoteToSession(
+        id,
+        note_id as unknown as mongoose.Types.ObjectId,
+      );
+
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
 
       return {
         status: 200,
@@ -218,10 +254,21 @@ export class SessionController {
   @Post('session/:id/add/task')
   async addTaskToSession(
     @Param('id') id: string,
-    @Body() data: { task: Task },
+    @Body() task_id: string,
   ): Promise<IResponse> {
     try {
-      const session = await this.sessionService.addTaskToSession(id, data.task);
+      const session = await this.sessionService.addTaskToSession(
+        id,
+        task_id as unknown as mongoose.Types.ObjectId,
+      );
+
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
 
       return {
         status: 200,
@@ -242,13 +289,21 @@ export class SessionController {
   @Post('session/:id/add/restriction')
   async addRestrictionToSession(
     @Param('id') id: string,
-    @Body() data: { restriction: Restriction },
+    @Body() restriction_id: string,
   ): Promise<IResponse> {
     try {
       const session = await this.sessionService.addRestrictionToSession(
         id,
-        data.restriction,
+        restriction_id as unknown as mongoose.Types.ObjectId,
       );
+
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
 
       return {
         status: 200,
@@ -277,6 +332,14 @@ export class SessionController {
         noteId,
       );
 
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
+
       return {
         status: 201,
         message: 'Note removed from session successfully',
@@ -304,6 +367,14 @@ export class SessionController {
         taskId,
       );
 
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
+
       return {
         status: 201,
         message: 'Task removed from session successfully',
@@ -330,6 +401,14 @@ export class SessionController {
         id,
         restrictionId,
       );
+
+      if (!session) {
+        return {
+          status: 400,
+          message: 'Session not found',
+          data: null,
+        };
+      }
 
       return {
         status: 201,

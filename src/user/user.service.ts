@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './user.schema';
+import { User, UserDocument } from './user.schema';
 import mongoose from 'mongoose';
 import { UserDto } from './dto/user.dto';
 import { Session } from 'src/session/session.schema';
@@ -9,11 +9,11 @@ import { Session } from 'src/session/session.schema';
 export class UserService {
   constructor(@InjectModel('User') private userModel: mongoose.Model<User>) {}
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserDocument[]> {
     return this.userModel.find().exec();
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<UserDocument> {
     return this.userModel.findById(id);
   }
 
@@ -29,11 +29,11 @@ export class UserService {
     }
   }
 
-  async update(id: string, data: Partial<User>): Promise<User> {
+  async update(id: string, data: Partial<User>): Promise<UserDocument> {
     return this.userModel.findByIdAndUpdate(id, data);
   }
 
-  async addSessionToUser(id: string, session: Session): Promise<User> {
+  async addSessionToUser(id: string, session: Session): Promise<UserDocument> {
     Logger.log(session);
 
     return this.userModel.findByIdAndUpdate(id, {
@@ -41,7 +41,7 @@ export class UserService {
     });
   }
 
-  async delete(id: string): Promise<User> {
+  async delete(id: string): Promise<UserDocument> {
     return this.userModel.findByIdAndDelete(id);
   }
 

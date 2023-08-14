@@ -1,19 +1,19 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Session } from './session.schema';
-import { Note } from 'src/notes/note.schema';
-import { Restriction } from 'src/restrictions/restriction.schema';
-import { IRestriction } from 'src/types/restriction';
-import { Task } from 'src/tasks/tasks.schema';
+import { Session, SessionDocument } from './session.schema';
+import { NoteDocument } from 'src/notes/note.schema';
+import { RestrictionDocument } from 'src/restrictions/restriction.schema';
+import { TaskDocument } from 'src/tasks/tasks.schema';
 
 @Injectable()
 export class SessionService {
   constructor(
-    @InjectModel('Session') private sessionModel: mongoose.Model<Session>,
+    @InjectModel('Session')
+    private sessionModel: mongoose.Model<SessionDocument>,
   ) {}
 
-  async findAll(): Promise<Session[]> {
+  async findAll(): Promise<SessionDocument[]> {
     // populate notes, restrictions, tasks
     const sessions = this.sessionModel
       .find()
@@ -25,29 +25,37 @@ export class SessionService {
     return sessions;
   }
 
-  async findOne(id: string): Promise<Session> {
-    const session = this.sessionModel.findById(id).exec();
+  async findOne(id: string): Promise<SessionDocument> {
+    const session = this.sessionModel
+      .findById(id)
+      .populate('tasks')
+      .populate('notes')
+      .populate('restrictions')
+      .exec();
 
     return session;
   }
 
-  async create(data: Session): Promise<Session> {
+  async create(data: Session): Promise<SessionDocument> {
     const newSession = new this.sessionModel(data);
 
     return newSession.save();
   }
 
-  async update(id: string, data: Partial<Session>): Promise<Session> {
+  async update(id: string, data: Partial<Session>): Promise<SessionDocument> {
     return this.sessionModel.findByIdAndUpdate(id, data);
   }
 
-  async delete(id: string): Promise<Session> {
+  async delete(id: string): Promise<SessionDocument> {
     return this.sessionModel.findByIdAndDelete(id);
   }
 
-  async addNoteToSession(sessionId: string, note: Note): Promise<Session> {
+  async addNoteToSession(
+    sessionId: string,
+    note: mongoose.Types.ObjectId,
+  ): Promise<SessionDocument> {
     const session = await this.sessionModel.findById(sessionId);
-    session.notes.push(note);
+    session.notes.push(note as unknown as string);
 
     return session.save();
   }
@@ -55,7 +63,7 @@ export class SessionService {
   async removeNoteFromSession(
     sessionId: string,
     noteId: string,
-  ): Promise<Session> {
+  ): Promise<SessionDocument> {
     const session = await this.sessionModel.findById(sessionId);
     session.notes = session.notes.filter((note: any) => note._id !== noteId);
 
@@ -64,10 +72,10 @@ export class SessionService {
 
   async addRestrictionToSession(
     sessionId: string,
-    restriction: Restriction,
-  ): Promise<Session> {
+    restriction: mongoose.Types.ObjectId,
+  ): Promise<SessionDocument> {
     const session = await this.sessionModel.findById(sessionId);
-    session.restrictions.push(restriction);
+    session.restrictions.push(restriction as unknown as string);
 
     return session.save();
   }
@@ -75,18 +83,21 @@ export class SessionService {
   async removeRestrictionFromSession(
     sessionId: string,
     restrictionId: string,
-  ): Promise<Session> {
+  ): Promise<SessionDocument> {
     const session = await this.sessionModel.findById(sessionId);
     session.restrictions = session.restrictions.filter(
-      (restriction: IRestriction) => restriction._id !== restrictionId,
+      (restriction: any) => restriction._id !== restrictionId,
     );
 
     return session.save();
   }
 
-  async addTaskToSession(sessionId: string, task: Task): Promise<Session> {
+  async addTaskToSession(
+    sessionId: string,
+    task: mongoose.Types.ObjectId,
+  ): Promise<SessionDocument> {
     const session = await this.sessionModel.findById(sessionId);
-    session.tasks.push(task);
+    session.tasks.push(task as unknown as string);
 
     return session.save();
   }
@@ -94,25 +105,36 @@ export class SessionService {
   async removeTaskFromSession(
     sessionId: string,
     taskId: string,
-  ): Promise<Session> {
+  ): Promise<SessionDocument> {
     const session = await this.sessionModel.findById(sessionId);
     session.tasks = session.tasks.filter((task: any) => task._id !== taskId);
 
     return session.save();
   }
 
-  async getNotesFromSession(sessionId: string): Promise<Note[]> {
-    const session = await this.sessionModel.findById(sessionId);
-    return session.notes;
+  async getNotesFromSession(sessionId: string): Promise<NoteDocument[]> {
+    const session = await this.sessionModel
+      .findById(sessionId)
+      .populate('notes');
+
+    return session.notes as unknown as NoteDocument[];
   }
 
-  async getRestrictionsFromSession(sessionId: string): Promise<Restriction[]> {
-    const session = await this.sessionModel.findById(sessionId);
-    return session.restrictions;
+  async getRestrictionsFromSession(
+    sessionId: string,
+  ): Promise<RestrictionDocument[]> {
+    const session = await this.sessionModel
+      .findById(sessionId)
+      .populate('restrictions');
+
+    return session.restrictions as unknown as RestrictionDocument[];
   }
 
-  async getTasksFromSession(sessionId: string): Promise<Task[]> {
-    const session = await this.sessionModel.findById(sessionId);
-    return session.tasks;
+  async getTasksFromSession(sessionId: string): Promise<TaskDocument[]> {
+    const session = await this.sessionModel
+      .findById(sessionId)
+      .populate('tasks');
+
+    return session.tasks as unknown as TaskDocument[];
   }
 }

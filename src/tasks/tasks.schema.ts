@@ -39,8 +39,16 @@ export class Task {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    required: true,
   })
-  created_by: User;
+  created_by: string;
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Session',
+    required: true,
+  })
+  session: string;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
